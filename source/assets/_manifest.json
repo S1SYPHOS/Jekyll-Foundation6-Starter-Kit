@@ -1,0 +1,24 @@
+{
+  "dependencies": {
+    "index.js": {
+      "files": [
+        "scripts/main.js",
+        "scripts/vendor.js"
+      ],
+      "main": true
+    },
+    "style.css": {
+      "files": [
+        "styles/main.scss"
+      ],
+      "main": true
+    }
+  },
+  "paths": {
+    "source": "source/assets/",
+    "dist": ".tmp/assets/"
+  },
+  "config": {
+    "devUrl": "localhost:3000"
+  }
+}

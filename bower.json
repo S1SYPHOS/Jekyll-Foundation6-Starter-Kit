@@ -1,0 +1,18 @@
+{
+  "name": "jekyll-foundation-6-starter",
+  "author": "S1SYPHOS <schmardt@posteo.se>",
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "HOMEPAGE",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "foundation-sites": "~6.0.4"
+  }
+}
