@@ -14,5 +14,14 @@
   ],
   "dependencies": {
     "foundation-sites": "~6.0.4"
+  },
+  "overrides": {
+    "foundation-sites": {
+      "main": [
+        "./scss/vendor/normalize.scss",
+        "./scss/foundation.scss",
+        "./dist/foundation.js"
+      ]
+    }
   }
 }
