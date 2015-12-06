@@ -17,7 +17,7 @@ All you need to get started:
 ### The Setup
 - Install [Ruby](https://www.ruby-lang.org/en/documentation/installation/)
 - Install [Node.js](http://nodejs.org/) and [NPM](https://npmjs.org/)
-- Install [Gulp](http://gruntjs.com/): `npm install -g gulp-cli`
+- Install [Gulp](http://gruntjs.com/): `npm install -g gulpjs/gulp-cli#4.0`
 - Install [Bower](http://bower.io/): `npm install -g bower`
 - Install [Bundler](http://bundler.io/): `gem install bundler`
 
