@@ -13,7 +13,7 @@
     "bower_components"
   ],
   "dependencies": {
-    "foundation-sites": "~6.0.4"
+    "foundation-sites": "~6.0.5"
   },
   "overrides": {
     "foundation-sites": {

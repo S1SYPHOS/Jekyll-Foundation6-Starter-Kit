@@ -1,7 +1,7 @@
 'use strict';
 
 // ## Globals
-var $$            = require('gulp-load-plugins')({rename: {'gulp-scss-lint': 'scsslint', 'gulp-minify-css': 'minifycss'}});
+var $$           = require('gulp-load-plugins')();
 var argv         = require('minimist')(process.argv.slice(2));
 var del          = require('del');
 var gulp         = require('gulp');
@@ -9,9 +9,37 @@ var lazypipe     = require('lazypipe');
 var merge        = require('merge-stream');
 var shell        = require('shelljs');
 
-// BROWSERSYNC -- http://www.browsersync.io/docs/gulp/
+// BrowserSync-- http://www.browsersync.io/docs/gulp/
 var browserSync = require('browser-sync');
 var reload = browserSync.reload;
+
+// PostCSS
+// 'autoprefixer' -- Parse CSS and add vendor prefixes to rules by Can I Use
+// https://github.com/postcss/autoprefixer
+var autoprefixer = require('autoprefixer');
+// 'postcss-merge-rules' -- Merge CSS rules
+// https://github.com/ben-eb/postcss-merge-rules
+var mergeCss     = require('postcss-merge-rules');
+// 'css-mqpacker' -- Pack same CSS media query rules into one media query rule
+// https://github.com/hail2u/node-css-mqpacker
+var mqpacker     = require('css-mqpacker');
+// 'postcss-pxtorem' -- Convert pixel units to rem (root em) units
+// https://github.com/cuth/postcss-pxtorem
+var pxtorem      = require('postcss-pxtorem');
+// 'processors' - Contains all PostCSS module options
+var processors   = [
+  autoprefixer({browsers: [
+    'last 2 versions',
+    'ie >= 9',
+    'and_chr >= 2.3'
+  ]}),
+  mergeCss,
+  mqpacker,
+  pxtorem({
+    prop_white_list: [],
+    replace: false
+  })
+];
 
 // ASSET-BUILDER -- https://github.com/austinpray/asset-builder
 // -- Credits to the great people over at https://github.com/roots/sage
@@ -43,128 +71,6 @@ var globs = manifest.globs;
 var project = manifest.getProjectGlobs();
 
 
-// ## REUSABLE PIPELINES -- https://github.com/OverZealous/lazypipe
-//
-
-// # CSS PROCESSING PIPELINE
-//
-var cssTasks = function(filename) {
-  return lazypipe()
-    .pipe(function() {
-      return $$.if(!argv.prod, $$.plumber());
-    })
-    .pipe(function() {
-      return $$.if(!argv.prod, $$.sourcemaps.init());
-    })
-    .pipe(function() {
-      return $$.sass({
-        outputStyle: 'expanded',
-        precision: 10,
-        includePaths: ['.']
-      }).on('error', $$.sass.logError);
-    })
-    .pipe($$.concat, filename)
-    .pipe($$.autoprefixer, {
-      browsers: [
-        'last 2 versions',
-        'android 4',
-        'opera 12'
-      ]
-    })
-    .pipe($$.size, {
-      title: 'styles',
-      showFiles: true
-    })
-
-    // Production settings
-    .pipe(function() {
-      return $$.if(argv.prod, $$.minifycss({
-        advanced: false,
-        rebase: false
-      }));
-    })
-    .pipe(function() {
-      return $$.if(argv.prod, $$.size({
-        title: 'minified styles',
-        showFiles: true
-      }));
-    })
-    .pipe(function() {
-      return $$.if(argv.prod, $$.gzip({
-        preExtension: 'gz'
-      }));
-    })
-    .pipe(function() {
-      return $$.if(argv.prod, $$.size({
-        title: 'gzipped styles',
-        gzip: true,
-        showFiles: true
-      }));
-    })
-    .pipe(function() {
-      return $$.if(argv.prod, $$.rev());
-    })
-    .pipe(function() {
-      return $$.if(!argv.prod, $$.sourcemaps.write('.', {
-        sourceRoot: 'assets/styles/'
-      }));
-    })();
-};
-
-
-// # JS PROCESSING PIPELINE
-//
-var jsTasks = function(filename) {
-  return lazypipe()
-    .pipe(function() {
-      return $$.if(!argv.prod, $$.sourcemaps.init());
-    })
-    .pipe($$.concat, filename)
-    .pipe($$.size, {
-      title: 'scripts',
-      showFiles: true
-    })
-
-    // Production settings
-    .pipe(function() {
-      return $$.if(argv.prod, $$.uglify({
-        compress: {
-          'drop_debugger': true
-        }
-      }));
-    })
-    .pipe(function() {
-      return $$.if(argv.prod, $$.size({
-        title: 'minified scripts',
-        showFiles: true
-      }));
-    })
-    .pipe(function() {
-      return $$.if(argv.prod, $$.gzip({
-        preExtension: 'gz'
-      }));
-    })
-    .pipe(function() {
-      return $$.if(argv.prod, $$.size({
-        title: 'gzipped scripts',
-        gzip: true,
-        showFiles: true
-      }));
-    })
-    .pipe(function() {
-      return $$.if(argv.prod, $$.rev());
-    })
-    .pipe(function() {
-      return $$.if(!argv.prod, $$.sourcemaps.write('.', {
-        sourceRoot: 'assets/scripts/'
-      }));
-    })
-    .pipe(function() {
-      return $$.if(!argv.prod, browserSync.stream());
-    })();
-};
-
-
 // ## GULP TASKS
 // 'gulp -T' for a task summary
 //
@@ -184,7 +90,7 @@ gulp.task('jsHint', function() {
 //
 gulp.task('scssLint', function() {
   return gulp.src('source/assets/styles/**/*.scss')
-    .pipe($$.scsslint());
+    .pipe($$.scssLint());
 });
 
 // # Wiredep -- https://github.com/taptapship/wiredep
@@ -200,16 +106,47 @@ gulp.task('wiredep', function() {
     .pipe(gulp.dest(path.source + 'styles'));
 });
 
-
-// # Styles
-// 'gulp styles' - Compiles, combines, and optimizes Bower CSS and project CSS.
-//
 gulp.task('styles', gulp.series('wiredep', function() {
   var merged = merge();
   manifest.forEachDependency('css', function(dep) {
-    var cssTasksInstance = cssTasks(dep.name);
-    merged.add(gulp.src(dep.globs, {base: 'styles'})
-      .pipe(cssTasksInstance));
+    merged.add(
+      gulp.src(dep.globs, {base: 'styles'})
+        .pipe($$.if(!argv.prod, $$.plumber()))
+        .pipe($$.if(!argv.prod, $$.sourcemaps.init()))
+        .pipe($$.sass({
+          outputStyle: 'expanded',
+          precision: 10,
+          includePaths: ['.']
+        }).on('error', $$.sass.logError))
+        .pipe($$.concat(dep.name))
+        // .pipe($$.postcss(processors))
+        .pipe($$.size({
+          title: 'styles',
+          showFiles: true
+        }))
+
+        // Production settings
+        .pipe($$.if(argv.prod, $$.minifyCss({
+            advanced: false,
+            rebase: false
+        })))
+        .pipe($$.if(argv.prod, $$.size({
+            title: 'minified styles',
+            showFiles: true
+        })))
+        .pipe($$.if(argv.prod, $$.gzip({
+            preExtension: 'gz'
+        })))
+        .pipe($$.if(argv.prod, $$.size({
+            title: 'gzipped styles',
+            gzip: true,
+            showFiles: true
+        })))
+        .pipe($$.if(argv.prod, $$.rev()))
+        .pipe($$.if(!argv.prod, $$.sourcemaps.write('.', {
+            sourceRoot: 'assets/styles/'
+        })))
+    );
   });
   return merged
     .pipe(gulp.dest(path.dist + 'styles'));
@@ -218,16 +155,46 @@ gulp.task('styles', gulp.series('wiredep', function() {
 // # Scripts
 // 'gulp scripts' - Compiles, combines, and optimizes Bower JS and project JS.
 //
-gulp.task('scripts', gulp.series(function() {
+gulp.task('scripts', function() {
   var merged = merge();
   manifest.forEachDependency('js', function(dep) {
-    var jsTasksInstance = jsTasks(dep.name);
-    merged.add(gulp.src(dep.globs, {base: 'scripts'})
-      .pipe(jsTasksInstance));
+    merged.add(
+      gulp.src(dep.globs, {base: 'scripts'})
+        .pipe($$.if(!argv.prod, $$.sourcemaps.init()))
+        .pipe($$.concat(dep.name))
+        .pipe($$.size({
+          title: 'scripts',
+          showFiles: true
+        }))
+
+        // Production settings
+        .pipe($$.if(argv.prod, $$.uglify({
+          compress: {
+            'drop_debugger': true
+          }
+        })))
+        .pipe($$.if(argv.prod, $$.size({
+          title: 'minified scripts',
+          showFiles: true
+        })))
+        .pipe($$.if(argv.prod, $$.gzip({
+          preExtension: 'gz'
+        })))
+        .pipe($$.if(argv.prod, $$.size({
+          title: 'gzipped scripts',
+          gzip: true,
+          showFiles: true
+        })))
+        .pipe($$.if(argv.prod, $$.rev()))
+        .pipe($$.if(!argv.prod, $$.sourcemaps.write('.', {
+            sourceRoot: 'assets/scripts/'
+          })))
+        .pipe($$.if(!argv.prod, browserSync.stream()))
+    );
   });
   return merged
     .pipe(gulp.dest(path.dist + 'scripts'));
-}));
+});
 
 // # Fonts
 // 'gulp fonts' - Grabs all the fonts and outputs them in a flattened directory
@@ -247,11 +214,11 @@ gulp.task('fonts', function() {
 //
 gulp.task('images', function() {
   return gulp.src(globs.images)
-    .pipe($$.cache($$.imagemin({
+    .pipe($$.imagemin({
       progressive: true,
       interlaced: true,
       svgoPlugins: [{removeUnknownsAndDefaults: false}, {cleanupIDs: false}]
-    })))
+    }))
     .pipe($$.size({
       title: 'images'
     }))
@@ -334,7 +301,7 @@ gulp.task('jekyll:doctor', function(done) {
 // 'gulp clean:gzip' -- erases all the gzipped files
 // 'gulp clean:metadata' -- deletes the metadata file for Jekyll
 gulp.task('clean:assets', function(done) {
-  del(['.tmp/**/*', '!.tmp/assets', '!.tmp/assets/images', '!.tmp/assets/images/**/*', 'build/assets']);
+  del(['.tmp/**/*', 'build/assets']);
   done();
 });
 gulp.task('clean:dist', function(done) {
@@ -363,7 +330,7 @@ gulp.task('clean', gulp.series('clean:assets', 'clean:gzip'));
 //
 gulp.task('assets', gulp.series(
   gulp.series('clean:assets'),
-  gulp.parallel('styles', 'scripts', 'images', 'fonts')
+  gulp.series('styles', 'scripts', 'images', 'fonts')
 ));
 
 // 'gulp assets:copy' -- copies the assets into the dist folder, needs to be
@@ -397,7 +364,7 @@ gulp.task('serve', function() {
   gulp.watch(['bower.json', 'source/assets/_manifest.json'], gulp.series('assets', reload));
 });
 
-// ## Gulp
+// # Gulp default
 // 'gulp' -- cleans your assets and gzipped files, creates your assets and
 // injects them into the templates, then builds your site, copied the assets
 // into their directory and serves the site
@@ -423,6 +390,7 @@ gulp.task('build', gulp.series(
 // # Gulp rebuild
 // 'gulp rebuild' -- WARNING: Erases your assets and built site, use only when
 // you need to do a complete rebuild
+//
 gulp.task('rebuild', gulp.series('clean:dist', 'clean:assets', 'clean:metadata'));
 
 // # Gulp check
