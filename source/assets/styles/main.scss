@@ -1,14 +1,56 @@
 @charset "utf-8";
 
-
+// For information about Foundation6 and Sass, see: http://foundation.zurb.com/sites/docs/sass.html
+// Local copy of Foundation6 settings file
 @import 'foundation-settings';
+
+// Automatically injected Bower dependencies via wiredep (never manually edit this block)
 // bower:scss
 @import "../../../bower_components/foundation-sites/scss/vendor/normalize.scss";
 @import "../../../bower_components/foundation-sites/scss/foundation.scss";
 // endbower
+
+// Use this to include all Foundation6 sass files ...
 @include foundation-everything;
 
-// Import partials
+// ... or only the ones you need
+// @include foundation-global-styles;
+// @include foundation-grid;
+// @include foundation-typography;
+// @include foundation-button;
+// @include foundation-forms;
+// @include foundation-visibility-classes;
+// @include foundation-float-classes;
+// @include foundation-accordion;
+// @include foundation-accordion-menu;
+// @include foundation-badge;
+// @include foundation-breadcrumbs;
+// @include foundation-button-group;
+// @include foundation-callout;
+// @include foundation-close-button;
+// @include foundation-drilldown-menu;
+// @include foundation-dropdown;
+// @include foundation-dropdown-menu;
+// @include foundation-flex-video;
+// @include foundation-label;
+// @include foundation-media-object;
+// @include foundation-menu;
+// @include foundation-off-canvas;
+// @include foundation-orbit;
+// @include foundation-pagination;
+// @include foundation-progress-bar;
+// @include foundation-slider;
+// @include foundation-sticky;
+// @include foundation-reveal;
+// @include foundation-switch;
+// @include foundation-table;
+// @include foundation-tabs;
+// @include foundation-thumbnail;
+// @include foundation-title-bar;
+// @include foundation-tooltip;
+// @include foundation-top-bar;
+
+// Import your own partials here
 @import
   'utility/variables',
   'utility/mixins',

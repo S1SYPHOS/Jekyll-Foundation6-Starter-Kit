@@ -32,5 +32,24 @@ Everything's ready to get started right away - here's my Gulp workflow:
 
 WORK IN PROGRESS
 
+### You want to use pre-compressed assets?
+
+No sweat, just include this snippet in your `.htaccess`:
+```apacheconf
+## GZIP-HANDLING -- https://github.com/sergejmueller/sergejmueller.github.io/wiki/Grunt%3A-GZIP-Komprimierung
+<FilesMatch "\.(js|css)\.gz$">
+  Header append Content-Encoding gzip
+  Header append Vary Accept-Encoding
+</FilesMatch>
+
+RewriteCond %{REQUEST_URI} \/(css|js)\/
+RewriteCond %{HTTP:Accept-encoding} gzip
+RewriteCond %{REQUEST_FILENAME}\.gz -s
+RewriteRule ^(.*)\.(css|js)$ $1\.$2\.gz [QSA]
+
+RewriteRule \.css\.gz$ - [T=text/css,E=no-gzip:1]
+RewriteRule \.js\.gz$ - [T=application/javascript,E=no-gzip:1]
+```
+
 ## Special Thanks
 I'd like to thank everybody that's making great software - you people are awesome. Also I'm always thankful for feedback and bug reports :)

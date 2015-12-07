@@ -1,6 +1,7 @@
 'use strict';
 
-// ## Globals
+// ### Globals
+//
 var $$           = require('gulp-load-plugins')();
 var argv         = require('minimist')(process.argv.slice(2));
 var del          = require('del');
@@ -9,11 +10,11 @@ var lazypipe     = require('lazypipe');
 var merge        = require('merge-stream');
 var shell        = require('shelljs');
 
-// BrowserSync-- http://www.browsersync.io/docs/gulp/
+// # BrowserSync-- http://www.browsersync.io/docs/gulp/
 var browserSync = require('browser-sync');
 var reload = browserSync.reload;
 
-// PostCSS
+// # PostCSS
 // 'autoprefixer' -- Parse CSS and add vendor prefixes to rules by Can I Use
 // https://github.com/postcss/autoprefixer
 var autoprefixer = require('autoprefixer');
@@ -41,9 +42,7 @@ var processors   = [
   })
 ];
 
-// ASSET-BUILDER -- https://github.com/austinpray/asset-builder
-// -- Credits to the great people over at https://github.com/roots/sage
-//
+// # Asset-Builder-- https://github.com/austinpray/asset-builder
 var manifest = require('asset-builder')('./source/assets/manifest.json');
 
 // 'path' - Paths to base asset directories. With trailing slashes.
@@ -71,31 +70,22 @@ var globs = manifest.globs;
 var project = manifest.getProjectGlobs();
 
 
-// ## GULP TASKS
+// ### GULP TASKS
 // 'gulp -T' for a task summary
 //
 
-// # JSHINT
-// 'gulp jsHint' - Lints project JS.
+// ## SCSS Section
 //
-gulp.task('jsHint', function() {
-  return gulp.src(['gulpfile.js'].concat(project.js))
-    .pipe($$.jshint())
-    .pipe($$.jshint.reporter('jshint-stylish'))
-    .pipe($$.if(argv.prod, $$.jshint.reporter('fail')));
-});
 
-// # SCSS-LINT
-// 'gulp scss-lint' - Lints project SCSS.
-//
+// # SCSS-Lint -- https://github.com/brigade/scss-lint
+// 'gulp scssLint' - Lints project SCSS
 gulp.task('scssLint', function() {
   return gulp.src('source/assets/styles/**/*.scss')
     .pipe($$.scssLint());
 });
 
 // # Wiredep -- https://github.com/taptapship/wiredep
-// 'gulp wiredep' - Automatically inject Sass Bower dependencies. See
-//
+// 'gulp wiredep' - Automatically injects Sass Bower dependencies
 gulp.task('wiredep', function() {
   var wiredep = require('wiredep').stream;
   return gulp.src(project.css)
@@ -106,6 +96,8 @@ gulp.task('wiredep', function() {
     .pipe(gulp.dest(path.source + 'styles'));
 });
 
+// # Styles
+// 'gulp styles' - Compiles, combines, and optimizes Bower CSS and project CSS
 gulp.task('styles', gulp.series('wiredep', function() {
   var merged = merge();
   manifest.forEachDependency('css', function(dep) {
@@ -119,7 +111,7 @@ gulp.task('styles', gulp.series('wiredep', function() {
           includePaths: ['.']
         }).on('error', $$.sass.logError))
         .pipe($$.concat(dep.name))
-        // .pipe($$.postcss(processors))
+        .pipe($$.postcss(processors))
         .pipe($$.size({
           title: 'styles',
           showFiles: true
@@ -134,27 +126,46 @@ gulp.task('styles', gulp.series('wiredep', function() {
             title: 'minified styles',
             showFiles: true
         })))
-        .pipe($$.if(argv.prod, $$.gzip({
-            preExtension: 'gz'
-        })))
-        .pipe($$.if(argv.prod, $$.size({
-            title: 'gzipped styles',
-            gzip: true,
-            showFiles: true
-        })))
         .pipe($$.if(argv.prod, $$.rev()))
+        // .pipe($$.if(argv.prod, $$.gzip({
+        //     preExtension: 'gz'
+        // })))
+        // .pipe($$.if(argv.prod, $$.size({
+        //     title: 'gzipped styles',
+        //     gzip: true,
+        //     showFiles: true
+        // })))
         .pipe($$.if(!argv.prod, $$.sourcemaps.write('.', {
             sourceRoot: 'assets/styles/'
         })))
     );
   });
   return merged
-    .pipe(gulp.dest(path.dist + 'styles'));
+    .pipe(gulp.dest(path.dist + 'styles'))
+    .pipe($$.if(argv.prod, $$.gzip()))
+    .pipe($$.if(argv.prod, $$.size({
+      title: 'gzipped styles',
+      gzip: true,
+      showFiles: true
+    })))
+    .pipe($$.if(argv.prod, gulp.dest(path.dist + 'styles')));
 }));
 
-// # Scripts
-// 'gulp scripts' - Compiles, combines, and optimizes Bower JS and project JS.
+
+// ## JS Section
 //
+
+// # JSHint
+// 'gulp jsHint' - Lints project JS
+gulp.task('jsHint', function() {
+  return gulp.src(['gulpfile.js'].concat(project.js))
+    .pipe($$.jshint())
+    .pipe($$.jshint.reporter('jshint-stylish'))
+    .pipe($$.if(argv.prod, $$.jshint.reporter('fail')));
+});
+
+// # Scripts
+// 'gulp scripts' - Compiles, combines, and optimizes Bower JS and project JS
 gulp.task('scripts', function() {
   var merged = merge();
   manifest.forEachDependency('js', function(dep) {
@@ -177,15 +188,15 @@ gulp.task('scripts', function() {
           title: 'minified scripts',
           showFiles: true
         })))
-        .pipe($$.if(argv.prod, $$.gzip({
-          preExtension: 'gz'
-        })))
-        .pipe($$.if(argv.prod, $$.size({
-          title: 'gzipped scripts',
-          gzip: true,
-          showFiles: true
-        })))
         .pipe($$.if(argv.prod, $$.rev()))
+        // .pipe($$.if(argv.prod, $$.gzip({
+        //   preExtension: 'gz'
+        // })))
+        // .pipe($$.if(argv.prod, $$.size({
+        //   title: 'gzipped scripts',
+        //   gzip: true,
+        //   showFiles: true
+        // })))
         .pipe($$.if(!argv.prod, $$.sourcemaps.write('.', {
             sourceRoot: 'assets/scripts/'
           })))
@@ -193,13 +204,23 @@ gulp.task('scripts', function() {
     );
   });
   return merged
-    .pipe(gulp.dest(path.dist + 'scripts'));
+    .pipe(gulp.dest(path.dist + 'scripts'))
+    .pipe($$.if(argv.prod, $$.gzip()))
+    .pipe($$.if(argv.prod, $$.size({
+      title: 'gzipped scripts',
+      gzip: true,
+      showFiles: true
+    })))
+    .pipe($$.if(argv.prod, gulp.dest(path.dist + 'scripts')));
 });
+
+
+// ## Fonts, Images & HTML Section
+//
 
 // # Fonts
 // 'gulp fonts' - Grabs all the fonts and outputs them in a flattened directory
 // structure -- https://github.com/armed/gulp-flatten
-//
 gulp.task('fonts', function() {
   return gulp.src(globs.fonts)
     .pipe($$.flatten())
@@ -210,8 +231,7 @@ gulp.task('fonts', function() {
 });
 
 // # Images
-// 'gulp images' - Run lossless compression on all the images.
-//
+// 'gulp images' - Run lossless compression on all the images
 gulp.task('images', function() {
   return gulp.src(globs.images)
     .pipe($$.imagemin({
@@ -225,11 +245,9 @@ gulp.task('images', function() {
     .pipe(gulp.dest(path.dist + 'images'));
 });
 
-
 // # HTML
 // 'gulp html' -- does nothing
 // 'gulp html --prod' -- minifies and gzips our HTML files
-//
 gulp.task('html', function() {
   return gulp.src('build/**/*.html')
     .pipe($$.if(argv.prod, $$.htmlmin({
@@ -252,10 +270,8 @@ gulp.task('html', function() {
     .pipe($$.if(argv.prod, gulp.dest('build')));
 });
 
-
-// # Injections
+// # Injections -- https://github.com/klei/gulp-inject
 // 'gulp inject:head' -- injects our style.css file into the head of our HTML
-//
 gulp.task('inject:head', function() {
   return gulp.src('source/_includes/head.html')
     .pipe($$.inject(gulp.src('.tmp/assets/styles/*.css', {read: false}), {ignorePath: '.tmp'}))
@@ -263,7 +279,6 @@ gulp.task('inject:head', function() {
 });
 
 // 'gulp inject:footer' -- injects our index.js file into the end of our HTML
-//
 gulp.task('inject:footer', function() {
   return gulp.src('source/_layouts/default.html')
     .pipe($$.inject(gulp.src('.tmp/assets/scripts/*.js', {read: false}), {ignorePath: '.tmp'}))
@@ -271,10 +286,12 @@ gulp.task('inject:footer', function() {
 });
 
 
+// ## Jekyll Section
+//
+
 // # Building Jekyll
 // 'gulp jekyll' -- builds your site with development settings
 // 'gulp jekyll --prod' -- builds your site with production settings
-//
 gulp.task('jekyll', function(done) {
   if (!argv.prod) {
     shell.exec('jekyll build');
@@ -285,7 +302,6 @@ gulp.task('jekyll', function(done) {
   }
 });
 
-
 // # Jekyll doctor
 // 'gulp jekyll:doctor' -- literally just runs jekyll doctor
 //
@@ -295,23 +311,28 @@ gulp.task('jekyll:doctor', function(done) {
 });
 
 
-// # Clean
+// ## Code Quality Section
+// 'gulp check' -- checks your Jekyll configuration for errors and lints both SCSS + JS
+gulp.task('check', gulp.series('jekyll:doctor', 'jsHint', 'scssLint'));
+
+
+// ## Cleaning Section
 // 'gulp clean:assets' -- deletes all assets except for images
-// 'gulp clean:dist' -- erases the dist folder
-// 'gulp clean:gzip' -- erases all the gzipped files
-// 'gulp clean:metadata' -- deletes the metadata file for Jekyll
 gulp.task('clean:assets', function(done) {
   del(['.tmp/**/*', 'build/assets']);
   done();
 });
+// 'gulp clean:dist' -- erases the dist folder
 gulp.task('clean:dist', function(done) {
   del(['build/']);
   done();
 });
+// 'gulp clean:gzip' -- erases all the gzipped files
 gulp.task('clean:gzip', function(done) {
   del(['build/**/*.gz']);
   done();
 });
+// 'gulp clean:metadata' -- deletes the metadata file for Jekyll
 gulp.task('clean:metadata', function(done) {
   del(['source/.jekyll-metadata']);
   done();
@@ -320,14 +341,9 @@ gulp.task('clean:metadata', function(done) {
 gulp.task('clean', gulp.series('clean:assets', 'clean:gzip'));
 
 
-// ### Assets
+// ## Assets
 // 'gulp assets' -- cleans out your assets and rebuilds them
 // 'gulp assets --prod' -- cleans out your assets and rebuilds them with production settings
-// gulp.task('assets', gulp.series(
-//   gulp.series('clean:assets'),
-//   gulp.parallel('styles', 'scripts', 'fonts', 'images')
-// ));
-//
 gulp.task('assets', gulp.series(
   gulp.series('clean:assets'),
   gulp.series('styles', 'scripts', 'images', 'fonts')
@@ -340,11 +356,21 @@ gulp.task('assets:copy', function() {
     .pipe(gulp.dest('build/assets'));
 });
 
+// ## Build/Serve/Rebuild Section
+//
 
-// # Gulp serve
+// # Build
+// 'gulp build' -- same as 'gulp' but doesn't serve your site in your browser
+// 'gulp build --prod' -- same as above but with production settings
+gulp.task('build', gulp.series(
+  gulp.series('clean:assets', 'clean:gzip'),
+  gulp.series('assets', 'inject:head', 'inject:footer'),
+  gulp.series('jekyll', 'assets:copy', 'html')
+));
+
+// # Serve
 // 'gulp serve' -- open up your website in your browser and watch for changes
 // in all your files and update them when needed
-//
 gulp.task('serve', function() {
   browserSync({
     // tunnel: true,
@@ -364,12 +390,11 @@ gulp.task('serve', function() {
   gulp.watch(['bower.json', 'source/assets/_manifest.json'], gulp.series('assets', reload));
 });
 
-// # Gulp default
+// # Build & Serve
 // 'gulp' -- cleans your assets and gzipped files, creates your assets and
 // injects them into the templates, then builds your site, copied the assets
 // into their directory and serves the site
 // 'gulp --prod' -- same as above but with production settings
-//
 gulp.task('default', gulp.series(
   gulp.series('clean:assets', 'clean:gzip'),
   gulp.series('assets', 'inject:head', 'inject:footer'),
@@ -377,23 +402,7 @@ gulp.task('default', gulp.series(
   gulp.series('serve')
 ));
 
-// # Gulp build
-// 'gulp build' -- same as 'gulp' but doesn't serve your site in your browser
-// 'gulp build --prod' -- same as above but with production settings
-//
-gulp.task('build', gulp.series(
-  gulp.series('clean:assets', 'clean:gzip'),
-  gulp.series('assets', 'inject:head', 'inject:footer'),
-  gulp.series('jekyll', 'assets:copy', 'html')
-));
-
-// # Gulp rebuild
+// # Rebuild
 // 'gulp rebuild' -- WARNING: Erases your assets and built site, use only when
 // you need to do a complete rebuild
-//
 gulp.task('rebuild', gulp.series('clean:dist', 'clean:assets', 'clean:metadata'));
-
-// # Gulp check
-// 'gulp check' -- checks your Jekyll configuration for errors and lints both SCSS + JS
-//
-gulp.task('check', gulp.series('jekyll:doctor', 'jsHint', 'scssLint'));
