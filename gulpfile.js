@@ -16,7 +16,7 @@ var reload = browserSync.reload;
 // ASSET-BUILDER -- https://github.com/austinpray/asset-builder
 // -- Credits to the great people over at https://github.com/roots/sage
 //
-var manifest = require('asset-builder')('./source/_data/manifest.json');
+var manifest = require('asset-builder')('./source/assets/manifest.json');
 
 // 'path' - Paths to base asset directories. With trailing slashes.
 // -- 'path.source' - Path to the source files. Default: 'assets/'
@@ -203,8 +203,6 @@ gulp.task('wiredep', function() {
 
 // # Styles
 // 'gulp styles' - Compiles, combines, and optimizes Bower CSS and project CSS.
-// By default this task will only log a warning if a precompiler error is
-// raised. If the '--production' flag is set: this task will fail outright.
 //
 gulp.task('styles', gulp.series('wiredep', function() {
   var merged = merge();
@@ -218,8 +216,7 @@ gulp.task('styles', gulp.series('wiredep', function() {
 }));
 
 // # Scripts
-// 'gulp scripts' - Runs jsHint then compiles, combines, and optimizes Bower JS
-// and project JS.
+// 'gulp scripts' - Compiles, combines, and optimizes Bower JS and project JS.
 //
 gulp.task('scripts', gulp.series(function() {
   var merged = merge();
@@ -234,7 +231,7 @@ gulp.task('scripts', gulp.series(function() {
 
 // # Fonts
 // 'gulp fonts' - Grabs all the fonts and outputs them in a flattened directory
-// structure. See: https://github.com/armed/gulp-flatten
+// structure -- https://github.com/armed/gulp-flatten
 //
 gulp.task('fonts', function() {
   return gulp.src(globs.fonts)
@@ -366,8 +363,7 @@ gulp.task('clean', gulp.series('clean:assets', 'clean:gzip'));
 //
 gulp.task('assets', gulp.series(
   gulp.series('clean:assets'),
-  gulp.parallel('styles', 'scripts', 'images'),
-  'fonts'
+  gulp.parallel('styles', 'scripts', 'images', 'fonts')
 ));
 
 // 'gulp assets:copy' -- copies the assets into the dist folder, needs to be
