@@ -1,24 +1,23 @@
 {
   "dependencies": {
-    "index.js": {
+    "main.js": {
       "files": [
         "scripts/main.js",
         "scripts/vendor.js"
       ],
       "main": true
     },
-    "style.css": {
+    "main.css": {
       "files": [
         "styles/main.scss"
-      ],
-      "main": true
+      ]
+    },
+    "jquery.js": {
+      "bower": ["jquery"]
     }
   },
   "paths": {
     "source": "source/assets/",
     "dist": ".tmp/assets/"
-  },
-  "config": {
-    "devUrl": "localhost:3000"
   }
 }

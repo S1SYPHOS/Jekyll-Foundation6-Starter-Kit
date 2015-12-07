@@ -17,7 +17,7 @@ All you need to get started:
 ### The Setup
 - Install [Ruby](https://www.ruby-lang.org/en/documentation/installation/)
 - Install [Node.js](http://nodejs.org/) and [NPM](https://npmjs.org/)
-- Install [Gulp](http://gruntjs.com/): `npm install -g gulp-cli`
+- Install [Gulp](http://gruntjs.com/): `npm install -g gulpjs/gulp-cli#4.0`
 - Install [Bower](http://bower.io/): `npm install -g bower`
 - Install [Bundler](http://bundler.io/): `gem install bundler`
 
@@ -31,6 +31,25 @@ Now it's time to install the project's dependencies:
 Everything's ready to get started right away - here's my Gulp workflow:
 
 WORK IN PROGRESS
+
+### You want to use pre-compressed assets?
+
+No sweat, just include this snippet in your `.htaccess`:
+```apacheconf
+## GZIP-HANDLING -- https://github.com/sergejmueller/sergejmueller.github.io/wiki/Grunt%3A-GZIP-Komprimierung
+<FilesMatch "\.(js|css)\.gz$">
+  Header append Content-Encoding gzip
+  Header append Vary Accept-Encoding
+</FilesMatch>
+
+RewriteCond %{REQUEST_URI} \/(css|js)\/
+RewriteCond %{HTTP:Accept-encoding} gzip
+RewriteCond %{REQUEST_FILENAME}\.gz -s
+RewriteRule ^(.*)\.(css|js)$ $1\.$2\.gz [QSA]
+
+RewriteRule \.css\.gz$ - [T=text/css,E=no-gzip:1]
+RewriteRule \.js\.gz$ - [T=application/javascript,E=no-gzip:1]
+```
 
 ## Special Thanks
 I'd like to thank everybody that's making great software - you people are awesome. Also I'm always thankful for feedback and bug reports :)
