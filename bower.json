@@ -1,17 +1,11 @@
 {
-  "name": "jekyll-foundation-6-starter",
-  "author": "S1SYPHOS <schmardt@posteo.se>",
-  "description": "",
-  "main": "",
-  "moduleType": [],
+  "name": "jekyll-foundation6-starter-kit",
+  "version": "1.0.0",
+  "homepage": "http://www.website.info",
+  "description": "Jekyll+Foundation6 Starter Kit",
+  "author": "S1SYPHOS <hello@daktylos.net>",
   "license": "MIT",
-  "homepage": "HOMEPAGE",
   "private": true,
-  "ignore": [
-    "**/.*",
-    "node_modules",
-    "bower_components"
-  ],
   "dependencies": {
     "foundation-sites": "~6.0.6"
   },

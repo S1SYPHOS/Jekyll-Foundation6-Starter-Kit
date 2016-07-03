@@ -319,19 +319,23 @@ gulp.task('check', gulp.series('jekyll:doctor', 'jsHint', 'scssLint'));
 // ## Cleaning Section
 // 'gulp clean:assets' -- deletes all assets except for images
 gulp.task('clean:assets', function(done) {
-  del(['.tmp/**/*', 'build/assets'], done);
+  del(['.tmp/**/*', 'build/assets']);
+  done();
 });
 // 'gulp clean:dist' -- erases the dist folder
 gulp.task('clean:dist', function(done) {
-  del(['build/'], done);
+  del(['build/']);
+  done();
 });
 // 'gulp clean:gzip' -- erases all the gzipped files
 gulp.task('clean:gzip', function(done) {
-  del(['build/**/*.gz'], done);
+  del(['build/**/*.gz']);
+  done();
 });
 // 'gulp clean:metadata' -- deletes the metadata file for Jekyll
 gulp.task('clean:metadata', function(done) {
-  del(['source/.jekyll-metadata'], done);
+  del(['source/.jekyll-metadata']);
+  done();
 });
 // 'gulp clean' -- erases your assets and gzipped files
 gulp.task('clean', gulp.series('clean:assets', 'clean:gzip'));

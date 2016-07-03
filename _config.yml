@@ -43,7 +43,3 @@ show_drafts: true
 lsi: false
 # Only make the last 10 posts so generating isn't slow
 limit_posts: 10
-
-# Extending Jekyll
-gems:
-  - jekyll-sitemap

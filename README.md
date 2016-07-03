@@ -2,7 +2,7 @@
 
 **You heard about the Foundation framework and want to use it on your next project? You also love Jekyll and don't want to miss it? Then THIS is for you!**
 
-Here's my personal Jekyll+Foundation5-Starter-Kit - starring:
+Here's my personal Jekyll+Foundation6-Starter-Kit - starring:
 + [Jekyll](http://jekyllrb.com/) - a blog-aware, static site generator.
 + [Foundation 6](http://foundation.zurb.com/) - a responsive front-end framework.
 
@@ -17,7 +17,7 @@ All you need to get started:
 ### The Setup
 - Install [Ruby](https://www.ruby-lang.org/en/documentation/installation/)
 - Install [Node.js](http://nodejs.org/) and [NPM](https://npmjs.org/)
-- Install [Gulp](http://gruntjs.com/): `npm install -g gulpjs/gulp-cli#4.0`
+- Install [Gulp](http://gulpjs.com/): `npm install -g gulpjs/gulp-cli#4.0`
 - Install [Bower](http://bower.io/): `npm install -g bower`
 - Install [Bundler](http://bundler.io/): `gem install bundler`
 
