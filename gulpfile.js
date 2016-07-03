@@ -369,8 +369,8 @@ gulp.task('build', gulp.series(
 ));
 
 // # Serve
-// 'gulp serve' -- open up your website in your browser and watch for changes
-// in all your files and update them when needed
+// 'gulp serve' -- opens up your website in your browser and watches for changes
+// in all your files and updates them when needed
 gulp.task('serve', function() {
   browserSync({
     // tunnel: true,
@@ -392,7 +392,7 @@ gulp.task('serve', function() {
 
 // # Build & Serve
 // 'gulp' -- cleans your assets and gzipped files, creates your assets and
-// injects them into the templates, then builds your site, copied the assets
+// injects them into the templates, then builds your site, copies the assets
 // into their directory and serves the site
 // 'gulp --prod' -- same as above but with production settings
 gulp.task('default', gulp.series(

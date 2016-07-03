@@ -9,7 +9,7 @@ Here's my personal Jekyll+Foundation6-Starter-Kit - starring:
 ## The Stack
 All you need to get started:
 - [Ruby](http://www.ruby-lang.org/): Required for Jekyll.
-- [Node.js](http://nodejs.org/) and [NPM](https://npmjs.org/): Required for Grunt & Grunt-plugins.
+- [Node.js](http://nodejs.org/) and [NPM](https://npmjs.org/): Required for Gulp & Gulp plugins.
 - [Gulp](http://gulpjs.com/): Automates development.
 - [Bower](http://bower.io/): Manages frontend dependencies.
 - [Bundler](http://bundler.io/): Manages Ruby dependencies.
@@ -32,7 +32,7 @@ Everything's ready to get started right away - and here's how:
 
 ### Workflow
 
-- WORK
+- `gulp check` -- checks your Jekyll configuration for errors and lints both SCSS + JS
 - IN
 - PROGRESS
 
@@ -41,7 +41,7 @@ Everything's ready to get started right away - and here's how:
 No sweat, just include this snippet in your `.htaccess`:
 ```apacheconf
 ## GZIP-HANDLING
-## See: https://github.com/sergejmueller/sergejmueller.github.io/wiki/Grunt%3A-GZIP-Komprimierung
+## See: https://github.com/sergejmueller/sergejmueller.github.io/wiki/Gulp%3A-GZIP-Komprimierung
 <FilesMatch "\.(js|css)\.gz$">
   Header append Content-Encoding gzip
   Header append Vary Accept-Encoding
